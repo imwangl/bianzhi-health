@@ -2,6 +2,8 @@
 
 移动端优先的排便健康记录 H5 / PWA。支持本机体验，也支持通过 Supabase 账户在多设备安全同步。
 
+在线体验：[https://imwangl.github.io/bianzhi-health/](https://imwangl.github.io/bianzhi-health/)
+
 ## 已实现
 
 - 拍照或选择照片，并在本机压缩、初步识别颜色
