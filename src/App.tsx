@@ -59,6 +59,7 @@ function App() {
 
   useEffect(() => {
     if (!session) return
+    setRecords([])
     setSyncing(true); setSyncError('')
     fetchCloudRecords()
       .then(setRecords)
@@ -80,8 +81,11 @@ function App() {
     } finally { setSyncing(false) }
   }
   const clearAll = async () => {
-    if (session) { setSyncing(true); await clearCloudRecords(); setRecords([]); setSyncing(false) }
-    else { clearRecords(); setRecords([]) }
+    if (!session) { clearRecords(); setRecords([]); return }
+    setSyncing(true); setSyncError('')
+    try { await clearCloudRecords(); setRecords([]) }
+    catch { setSyncError('云端记录清除失败，请检查网络后重试。') }
+    finally { setSyncing(false) }
   }
 
   if (!authReady) return <div className="app-loading"><Logo /><LoaderCircle className="spin" /><span>正在安全连接...</span></div>
@@ -223,7 +227,7 @@ function ProfileView({ records, email, syncing, onReset, onClear, onLogout }: { 
       <h2>数据管理</h2>
       <button onClick={exportData}><span className="setting-icon"><FileDown /></span><div><strong>导出记录</strong><small>不包含照片的 JSON 文件</small></div><ChevronRight /></button>
       {!email && <button onClick={onReset}><span className="setting-icon"><RotateCcw /></span><div><strong>恢复体验数据</strong><small>便于重新浏览完整界面</small></div><ChevronRight /></button>}
-      <button className="danger-row" onClick={() => confirm('确定清除所有本机记录吗？此操作无法撤销。') && onClear()}><span className="setting-icon"><Trash2 /></span><div><strong>清除全部记录</strong><small>照片与记录将无法恢复</small></div><ChevronRight /></button>
+      <button className="danger-row" onClick={() => confirm(`确定清除所有${email ? '云端' : '本机'}记录吗？此操作无法撤销。`) && onClear()}><span className="setting-icon"><Trash2 /></span><div><strong>清除全部记录</strong><small>照片与记录将无法恢复</small></div><ChevronRight /></button>
       <button onClick={onLogout}><span className="setting-icon"><LogOut /></span><div><strong>{email ? '退出登录' : '登录并开启同步'}</strong><small>{email ? '本机将不再显示该账户的数据' : '在其他电脑和手机访问记录'}</small></div><ChevronRight /></button>
     </section>
     <section className="medical-note"><AlertTriangle /><div><strong>健康提示</strong><p>便知用于日常健康记录，不能替代医生诊断。出现大量便血、黑色柏油样便、剧烈腹痛、持续发热或明显乏力时，请及时就医。</p></div></section>
