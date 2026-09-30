@@ -21,9 +21,10 @@ export default function AuthScreen({ onGuest }: { onGuest: () => void }) {
     if (!supabase) { setError('云端服务尚未配置，请先使用本机体验。'); return }
     if (password.length < 6) { setError('密码至少需要 6 位。'); return }
     setLoading(true)
+    const redirectTo = new URL(import.meta.env.BASE_URL, window.location.origin).toString()
     const result = mode === 'login'
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } })
     setLoading(false)
     if (result.error) { setError(result.error.message === 'Invalid login credentials' ? '邮箱或密码不正确。' : result.error.message); return }
     if (mode === 'signup' && !result.data.session) setMessage('注册成功，请前往邮箱完成验证后登录。')
